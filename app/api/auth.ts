@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getServerSideConfig } from "../config/server";
 import md5 from "spark-md5";
 import { ACCESS_CODE_PREFIX } from "../constant";
+import { OPENAI_URL } from "./common";
 
 function getIP(req: NextRequest) {
   let ip = req.ip ?? req.headers.get("x-real-ip");
@@ -24,7 +25,7 @@ function parseApiKey(bearToken: string) {
   };
 }
 
-export function auth(req: NextRequest) {
+export function auth(req: NextRequest, authInfo: boolean = false) {
   const authToken = req.headers.get("Authorization") ?? "";
 
   // check if it is openai api key or user token
@@ -61,5 +62,9 @@ export function auth(req: NextRequest) {
 
   return {
     error: false,
+    // 返回一些身份信息
+    ip: authInfo ? getIP(req) : "",
+    code: authInfo ? accessCode : "",
+    token: authInfo ? token : "",
   };
 }

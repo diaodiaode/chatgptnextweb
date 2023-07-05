@@ -17,6 +17,8 @@ import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 
+import saveMessages from "./saveMessages";
+
 export type ChatMessage = RequestMessage & {
   date: string;
   streaming?: boolean;
@@ -315,6 +317,9 @@ export const useChatStore = create<ChatStore>()(
           ]);
         });
 
+        // 记录问题
+        saveMessages(sendMessages[sendMessages.length - 1]);
+
         // make request
         api.llm.chat({
           messages: sendMessages,
@@ -333,6 +338,8 @@ export const useChatStore = create<ChatStore>()(
             if (message) {
               botMessage.content = message;
               get().onNewMessage(botMessage);
+              // 记录回答
+              saveMessages(botMessage);
             }
             ChatControllerPool.remove(
               sessionIndex,
